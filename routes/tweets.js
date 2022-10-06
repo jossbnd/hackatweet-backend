@@ -15,7 +15,9 @@ router.get("/", (req, res) => {
         tweets.push({
           message: tweet.message,
           date: tweet.date,
+          firstname: tweet.user.firstname,
           username: tweet.user.username,
+          likes: tweet.likes,
           token: tweet.token,
         });
       }
