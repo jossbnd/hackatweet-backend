@@ -3,6 +3,7 @@ var router = express.Router();
 const uid2 = require("uid2");
 const User = require("../models/users.js");
 const Tweet = require("../models/tweets.js");
+const { count } = require("../models/tweets.js");
 
 router.get("/", (req, res) => {
   let tweets = [];
@@ -27,11 +28,11 @@ router.get("/", (req, res) => {
 });
 
 router.post("/new/:token", (req, res) => {
-  if (req.body.message.length > 255) {
+  if (req.body.message.length > 280) {
     res.json({
       result: false,
       error:
-        "A tweet cannot exceed 255 characters, you have actually " +
+        "A tweet cannot exceed 280 characters, you have actually " +
         req.body.message.length +
         " caractères",
     });
@@ -55,6 +56,48 @@ router.post("/new/:token", (req, res) => {
       }
     });
   }
+});
+
+router.post("/like/:token", (req, res) => {
+  Tweet.findOne({ token: req.params.token }).then((data) => {
+    if (data) {
+      let countTweet = data.likes;
+
+      Tweet.updateOne(
+        { token: req.params.token },
+        { likes: countTweet + 1 }
+      ).then(() => {});
+
+      res.json({ result: true, message: "like added" });
+    } else if (!data) {
+      res.json({
+        result: false,
+        message: "cant find your message with this token",
+      });
+    }
+  });
+});
+
+router.post("/unlike/:token", (req, res) => {
+  Tweet.findOne({ token: req.params.token }).then((data) => {
+    if (!data) {
+      res.json({
+        result: false,
+        message: "Cant unlike the tweet, because not find",
+      });
+    } else if (data.likes === 0) {
+      res.json({ result: false, message: "Like is already at 0" });
+    } else if (data && data.likes > 0) {
+      let countTweet = data.likes;
+
+      Tweet.updateOne(
+        { token: req.params.token },
+        { likes: countTweet - 1 }
+      ).then(() => {});
+
+      res.json({ result: true, message: "One like have been deleted" });
+    }
+  });
 });
 
 router.delete("/delete/:token", (req, res) => {
