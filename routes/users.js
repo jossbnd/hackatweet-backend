@@ -4,6 +4,19 @@ const User = require("../models/users.js");
 const uid2 = require("uid2");
 const bcrypt = require("bcrypt");
 
+// GET
+router.get("/likedTweets/:token", (req, res) => {
+  User.findOne({ token: req.params.token }).populate('likedTweets').then(data => {
+    if (data) {
+      res.json({ result: true, likedTweets: data.likedTweets })
+    } else {
+      return;
+    }
+  })
+})
+
+
+
 // Signup
 router.post("/signup", (req, res) => {
   // Check if body is empty or not
