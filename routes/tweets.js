@@ -50,6 +50,7 @@ router.post("/new/:token", (req, res) => {
         });
 
         newTweet.save().then((newDoc) => {});
+
         res.json({ result: true, message: "Tweet have been add posted" });
       } else {
         res.json({ result: false, error: "User not found" });
@@ -59,14 +60,21 @@ router.post("/new/:token", (req, res) => {
 });
 
 router.post("/like/:token", (req, res) => {
-  Tweet.findOne({ token: req.params.token }).then((data) => {
+  Tweet.findOne({ token: req.params.token }).populate('user').then((data) => {
     if (data) {
-      let countTweet = data.likes;
-
       Tweet.updateOne(
         { token: req.params.token },
-        { likes: countTweet + 1 }
-      ).then(() => {});
+        { likes: data.likes + 1 }
+      ).then((data) => {
+        console.log(data);
+      });
+
+      User.findOne({ token: data.user.token }).then((userData) => {
+        const newLikedTweet = [...userData.likedTweets, data._id];
+
+        userData.likedTweets = newLikedTweet;
+        userData.save().then();
+      });
 
       res.json({ result: true, message: "like added" });
     } else if (!data) {

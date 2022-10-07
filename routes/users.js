@@ -25,6 +25,7 @@ router.post("/signup", (req, res) => {
         username: req.body.username,
         password: hash,
         token: uid2(32),
+        likedTweets: [],
       });
 
       newUser.save().then((newDoc) => {
